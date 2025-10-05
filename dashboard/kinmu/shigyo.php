@@ -102,10 +102,65 @@ for ($i = 0; $i < $days; $i++) {
             <button type="button" class="btn btn-outline-primary ms-2" id="rangeBtn">時間選択</button>
         </div>
     </form>
-    <div class="table-responsive">
-        <div class="calendar-controls">
-        <form id="columnSelectForm">
-        <table class="table table-bordered calendar-table">
+    <div id="alertContainer"></div>
+    <script>
+    window.addEventListener('DOMContentLoaded', function () {
+        // 赤セル・緑セル・未割付セルがあるか監視してアラート表示
+        setTimeout(function() {
+            let hasRed = false;
+            let hasGreen = false;
+            let hasAny = false;
+            let allZero = true;
+            document.querySelectorAll('.calendar-cell').forEach(function(cell) {
+                const bg = cell.style.backgroundColor;
+                if (bg === 'rgb(255, 0, 0)' || bg === '#ff0000') {
+                    hasRed = true;
+                    hasAny = true;
+                    allZero = false;
+                } else if (bg === 'rgb(0, 255, 0)' || bg === '#00ff00') {
+                    hasGreen = true;
+                    hasAny = true;
+                    allZero = false;
+                } else if (cell.textContent.trim() !== '') {
+                    hasAny = true;
+                    allZero = false;
+                }
+            });
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = '';
+
+            // アイコン定義
+            const warningIcon = '<span style="color:#dc3545;font-size:1.3em;vertical-align:middle;margin-right:0.5em;">&#9888;&#xfe0f;</span>';
+            const infoIcon = '<span style="color:#0dcaf0;font-size:1.3em;vertical-align:middle;margin-right:0.5em;">&#8505;&#xfe0f;</span>';
+
+            if (hasRed) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger d-flex align-items-center';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = warningIcon + '欠員が発生しています';
+                alertContainer.appendChild(alertDiv);
+            }
+            if (hasGreen) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success d-flex align-items-center';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = infoIcon + '余剰割付が発生しています';
+                alertContainer.appendChild(alertDiv);
+            }
+            if (!hasAny || allZero) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-primary d-flex align-items-center';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = infoIcon + '勤務割付・仕業作成が行われていません';
+                alertContainer.appendChild(alertDiv);
+            }
+        }, 1200);
+    });
+    </script>
+    <div class="calendar-controls">
+    <form id="columnSelectForm">
+    <div class="table-responsive" style="overflow-x: auto;">
+        <table class="table table-bordered calendar-table" style="min-width: 1800px;">
             <thead>
             <tr>
             <th class="calendar-header">日付</th>
@@ -140,6 +195,7 @@ for ($i = 0; $i < $days; $i++) {
             <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
         </form>
         <div class="d-flex justify-content-center my-3">
             <a href="<?= htmlspecialchars(build_url(['offset' => $offset - 1])) ?>" class="btn btn-outline-secondary me-2">&lt; 前へ</a>

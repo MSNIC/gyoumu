@@ -61,9 +61,22 @@ function buildQuery($params) {
                 </select>
             </div>
         </form>
-        <button type="button" class="btn btn-success" onclick="window.open('e/add.php', 'addEmployee', 'width=400,resizable=yes,scrollbars=yes,location=no,menubar=no,toolbar=no,status=no'); return false;">
-            従業員の追加
-        </button>
+        <?php
+        // ユーザー権限を取得（例: $_SESSION['auth'] に格納されていると仮定）
+        $auth = isset($_SESSION['permission']) ? (int)$_SESSION['permission'] : 0;
+        ?>
+        <div class="d-flex gap-2">
+            <?php if ($auth >= 4): ?>
+            <button type="button" class="btn btn-primary" onclick="window.open('e/new_recruit.php', 'newHire', 'width=400,resizable=yes,scrollbars=yes,location=no,menubar=no,toolbar=no,status=no'); return false;">
+                新規採用
+            </button>
+            <?php endif; ?>
+            <?php if ($auth >= 6): ?>
+            <button type="button" class="btn btn-success" onclick="window.open('e/add.php', 'addEmployee', 'width=400,resizable=yes,scrollbars=yes,location=no,menubar=no,toolbar=no,status=no'); return false;">
+                従業員の追加
+            </button>
+            <?php endif; ?>
+        </div>
     </div>
     <div class="table-responsive">
         <?php if (empty($displayEmployees)): ?>
