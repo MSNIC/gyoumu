@@ -48,6 +48,9 @@ Copyright (c) 2025 MSNIC. All rights reserved.
                 <div class="text-center">
                     <a href="gpthry.php" class="small">ID・パスワードを忘れた</a>
                 </div>
+                <div class="d-grid mt-4">
+                    <button type="button" class="btn btn-secondary" onclick="window.close();">業務終了</button>
+                </div>
             </div>
         </div>
     </div>

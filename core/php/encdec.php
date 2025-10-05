@@ -65,7 +65,7 @@ function encrypt(
     $str // 暗号化対象
 ){
     // 鍵読み込み
-    include('../.config/server_key.php');
+    include_once($_SERVER["DOCUMENT_ROOT"].'/.config/server_key.php');
     $data = key_get();
     $n = $data['pub1'];
     $e = $data['pub2'];
@@ -82,7 +82,7 @@ function decrypt(
     $str // 複合化対象
 ){
     // 鍵読み込み
-    include('../.config/server_key.php');
+    include_once($_SERVER["DOCUMENT_ROOT"].'/.config/server_key.php');
     $data = key_get();
     $d = $data['pri'];
     $n = $data['pub1'];

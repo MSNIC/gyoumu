@@ -15,6 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $encrypted_username = encrypt($username); // encrypt()はencdec.php内の関数
             setcookie('session', $encrypted_username, 0, '/', '', false, true);
             // ログイン成功時の処理（例: リダイレクト）
+            header('Location: /dashboard/');
+            exit();
         } else {
             // ログイン失敗時の処理
             // POSTで/index.phpにfail=yesを送信してリダイレクトする
