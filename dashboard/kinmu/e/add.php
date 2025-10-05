@@ -51,8 +51,8 @@ require_once $_SERVER["DOCUMENT_ROOT"] . "/dashboard/check.php";
                 <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
                 <select class="form-select" name="gender" required>
                     <option value="">選択してください</option>
-                    <option value="male">男</option>
-                    <option value="female">女</option>
+                    <option value="0">男</option>
+                    <option value="1">女</option>
                 </select>
             </div>
         </div>
@@ -77,11 +77,48 @@ require_once $_SERVER["DOCUMENT_ROOT"] . "/dashboard/check.php";
                 <input type="email" class="form-control" id="email" name="email">
             </div>
         </div>
+        <?php
+        // データベースから部署一覧を取得
+        require_once $_SERVER["DOCUMENT_ROOT"] . "/core/php/cdb.php"; // cdb()を利用
+        $departments = [];
+        try {
+            $pdo = cdb();
+            $stmt = $pdo->query("SELECT * FROM dep ORDER BY id");
+            $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $departments = [];
+        }
+        ?>
         <div class="mb-3">
             <label for="department" class="form-label">所属部署</label>
             <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-building"></i></span>
-                <input type="text" class="form-control" id="department" name="department" required>
+            <span class="input-group-text"><i class="bi bi-building"></i></span>
+            <select class="form-select" id="department" name="department" required>
+                <option value="">選択してください</option>
+                <?php
+                // 部署を親部署ごとにグループ化
+                $parents = [];
+                $children = [];
+                foreach ($departments as $dept) {
+                    if ($dept['is_parent']) {
+                        $parents[$dept['id']] = $dept['name'];
+                    } else {
+                        $children[$dept['parent']][] = $dept;
+                    }
+                }
+                foreach ($parents as $parent_id => $parent_name):
+                ?>
+                    <optgroup label="<?= htmlspecialchars($parent_name) ?>">
+                        <?php if (!empty($children[$parent_id])): ?>
+                            <?php foreach ($children[$parent_id] as $child): ?>
+                                <option value="<?= htmlspecialchars($child['id']) ?>">
+                                    <?= htmlspecialchars($child['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </optgroup>
+                <?php endforeach; ?>
+            </select>
             </div>
         </div>
         <button type="submit" class="btn btn-primary">追加</button>
@@ -91,6 +128,12 @@ require_once $_SERVER["DOCUMENT_ROOT"] . "/dashboard/check.php";
     $(function() {
         $('#employeeForm').on('submit', function(e) {
             e.preventDefault();
+            // 部署が選択されているかチェック
+            if ($('#department').val() === "") {
+                alert('所属部署を選択してください。');
+                $('#department').focus();
+                return false;
+            }
             var $form = $(this);
             $.ajax({
                 url: $form.attr('action'),
@@ -104,7 +147,7 @@ require_once $_SERVER["DOCUMENT_ROOT"] . "/dashboard/check.php";
                     }
                     window.close();
                 } else {
-                    alert('追加に失敗しました。');
+                    alert('追加に失敗しました。\n' + response.reason);
                 }
             }).fail(function() {
                 alert('通信エラーが発生しました。');

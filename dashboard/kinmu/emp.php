@@ -6,7 +6,7 @@ require_once $_SERVER["DOCUMENT_ROOT"]. '/core/php/cdb.php';
 
 try {
     $pdo = cdb();
-    $stmt = $pdo->query('SELECT id, name, yomi FROM employee ORDER BY id');
+    $stmt = $pdo->query('SELECT * FROM employee ORDER BY id');
     $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $employees = [];
@@ -25,6 +25,16 @@ $displayEmployees = array_slice($employees, $start, $perPage);
 function buildQuery($params) {
     return http_build_query(array_merge($_GET, $params));
 }
+
+// 部署IDから階層付き部署名を取得する関数
+                function getDepartmentFullName($depId, $depMap) {
+                    $names = [];
+                    while ($depId && isset($depMap[$depId])) {
+                        array_unshift($names, $depMap[$depId]['name']);
+                        $depId = $depMap[$depId]['parent'];
+                    }
+                    return implode('/', $names);
+                }
 ?>
 <!DOCTYPE html>
 <html lang="ja-jp">
@@ -67,6 +77,7 @@ function buildQuery($params) {
                 <th>従業員番号</th>
                 <th>氏名</th>
                 <th>読み方</th>
+                <th>所属部署</th>
                 <th>操作</th>
                 </tr>
             </thead>
@@ -75,19 +86,34 @@ function buildQuery($params) {
                 <tr>
                 <td><?= htmlspecialchars($emp['id']) ?></td>
                 <td><?= htmlspecialchars($emp['name']) ?></td>
-                <td><?= htmlspecialchars($emp['yomi']) ?></td>
+                <td><?= htmlspecialchars($emp['yomigana']) ?></td>
+                <?php
+
+                // 部署情報を取得し、IDをキーにマッピング
+                $depMap = [];
+                try {
+                    $stmtDep = $pdo->query('SELECT id, name, parent FROM dep');
+                    foreach ($stmtDep->fetchAll(PDO::FETCH_ASSOC) as $dep) {
+                        $depMap[$dep['id']] = $dep;
+                    }
+                } catch (Exception $e) {
+                    // エラー時は空配列
+                    $depMap = [];
+                }
+                ?>
+                <td><?= htmlspecialchars(getDepartmentFullName($emp['department'] ?? null, $depMap)) ?></td>
                 <td>
-                    <a href="view.php?id=<?= $emp['id'] ?>" class="btn btn-primary btn-sm"
+                    <a href="e/view.php?id=<?= $emp['id'] ?>" class="btn btn-primary btn-sm"
                         onclick="window.open(this.href, 'viewEmployee<?= $emp['id'] ?>', 'width=600,height=600,resizable=yes,scrollbars=yes'); return false;">勤務照会</a>
-                    <a href="edit.php?id=<?= $emp['id'] ?>" class="btn btn-warning btn-sm"
+                    <a href="e/edit.php?id=<?= $emp['id'] ?>" class="btn btn-warning btn-sm"
                         onclick="window.open(this.href, 'editEmployee<?= $emp['id'] ?>', 'width=500,height=600,resizable=yes,scrollbars=yes'); return false;">編集</a>
-                    <a href="contact.php?id=<?= $emp['id'] ?>" class="btn btn-info btn-sm"
+                    <a href="e/contact.php?id=<?= $emp['id'] ?>" class="btn btn-info btn-sm"
                         onclick="window.open(this.href, 'contactEmployee<?= $emp['id'] ?>', 'width=500,height=500,resizable=yes,scrollbars=yes'); return false;">連絡</a>
-                    <a href="rest.php?id=<?= $emp['id'] ?>" class="btn btn-secondary btn-sm"
+                    <a href="e/rest.php?id=<?= $emp['id'] ?>" class="btn btn-secondary btn-sm"
                         onclick="window.open(this.href, 'restEmployee<?= $emp['id'] ?>', 'width=400,height=400,resizable=yes,scrollbars=yes'); return false;">休務</a>
-                    <a href="accident.php?id=<?= $emp['id'] ?>" class="btn btn-danger btn-sm"
+                    <a href="e/accident.php?id=<?= $emp['id'] ?>" class="btn btn-danger btn-sm"
                         onclick="window.open(this.href, 'accidentEmployee<?= $emp['id'] ?>', 'width=500,height=500,resizable=yes,scrollbars=yes'); return false;">労災</a>
-                    <a href="delete.php?id=<?= $emp['id'] ?>" class="btn btn-outline-danger btn-sm"
+                    <a href="e/delete.php?id=<?= $emp['id'] ?>" class="btn btn-outline-danger btn-sm"
                         onclick="if(confirm('本当に削除しますか？')){window.open(this.href, 'deleteEmployee<?= $emp['id'] ?>', 'width=400,height=300,resizable=yes,scrollbars=yes');} return false;">削除</a>
                 </td>
                 </tr>
