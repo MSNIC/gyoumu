@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $encryptedBase64 = base64_encode($hash);
             // QRコード生成
-            $qrPath = 'qrcode_'.time().'.png';
+            $qrPath = 'QR/qrcode_'.$hash.'.png';
             QRcode::png($encryptedBase64, $qrPath, QR_ECLEVEL_L, 10);
         } catch (Exception $e) {
             $error = '登録に失敗しました: ' . htmlspecialchars($e->getMessage());
