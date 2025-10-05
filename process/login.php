@@ -1,4 +1,5 @@
 <?php
+session_start();
 include_once('../core/php/cdb.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
@@ -6,10 +7,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($username !== '' && $password !== '') {
         $db = cdb();
-        $stmt = $db->prepare('SELECT pwd FROM users WHERE name = ?');
+        $stmt = $db->prepare('SELECT pwd, permission FROM users WHERE name = ?');
         $stmt->execute([$username]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        $_SESSION['permission'] = isset($row['permission']) ? $row['permission'] : 0;
         if ($row && hash('sha3-512', $password) === $row['pwd']) {
             include_once('../core/php/encdec.php');
             $encrypted_username = encrypt($username); // encrypt()はencdec.php内の関数
