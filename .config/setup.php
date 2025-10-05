@@ -9,7 +9,8 @@ $sql = "CREATE TABLE IF NOT EXISTS users (
 );
 CREATE TABLE IF NOT EXISTS employee (id INT(6) NOT NULL , `name` VARCHAR(20) NOT NULL, `yomigana` VARCHAR(20) NOT NULL , `birthday` DATE NOT NULL , `gender` INT(1) NOT NULL , `address` TEXT NOT NULL , `tel` TEXT NOT NULL , `mail` TEXT NOT NULL , `department` INT(10) NOT NULL, PRIMARY KEY(id));
 CREATE TABLE IF NOT EXISTS `dep` ( `id` INT(10) NOT NULL AUTO_INCREMENT , `name` TEXT NOT NULL , `parent` INT(10) NOT NULL , `is_parent` INT NOT NULL , PRIMARY KEY (`id`));
-CREATE TABLE IF NOT EXISTS `shigyo` ( `id` INT(255) NOT NULL AUTO_INCREMENT , `date-time` TEXT NOT NULL , `haichi` INT(5) NOT NULL , PRIMARY KEY (`id`));";
+CREATE TABLE IF NOT EXISTS `shigyo` ( `id` INT(255) NOT NULL AUTO_INCREMENT , `date-time` TEXT NOT NULL , `haichi` INT(5) NOT NULL , PRIMARY KEY (`id`));
+CREATE TABLE `gyoumu`.`recruit_dis_yoyaku` ( `id` INT(255) NOT NULL AUTO_INCREMENT , `name` TEXT NOT NULL , `birth` DATE NOT NULL , `interview_date` DATE NOT NULL , PRIMARY KEY (`id`));";
 $db->query($sql);
 
 $sql = "ALTER TABLE `users` ADD IF NOT EXISTS `permission` INT(2) NOT NULL DEFAULT '0' AFTER `permission`;
